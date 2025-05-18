@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sticky Notes</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f0f0f0;
+    }
+
+    #createNoteButton {
+      position: fixed;
+      right: 0px;
+      bottom: 0px;
+      border-radius: 50%;
+      margin: 1rem; 
+      height: 56px;
+      width: 56px;
+      font-size: 2rem; cursor: pointer;
+    }
+
+    .note {
+      position: absolute;
+      background: #fff8a6;
+      border: 1px solid #ccc;
+      resize: both;
+      overflow: auto;
+      width: 200px;
+      height: 150px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .note-header {
+      background: #f6e58d;
+      padding: 4px;
+      cursor: move;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    .note textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      resize: none;
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.5rem;     
+    }
+    
+    .note textarea:focus {
+      border: none;
+      appearance: none;
+      outline: none;
+      outline-offset: none;
+}
+  </style>
+</head>
+<body>
+  <button id="createNoteButton">+</button>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
+  <script src="https://unpkg.com/react-redux@8.1.2/dist/react-redux.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { createStore } = Redux;
+    const { Provider, useDispatch, useSelector } = ReactRedux;
+
+    const ADD_NOTE = 'ADD_NOTE';
+    const UPDATE_NOTE = 'UPDATE_NOTE';
+
+    const addNote = (note) => ({ type: ADD_NOTE, note });
+    const updateNote = (id, data) => ({ type: UPDATE_NOTE, id, data });
+
+    const reducer = (state = [], action) => {
+      switch (action.type) {
+        case ADD_NOTE:
+          return [...state, action.note];
+        case UPDATE_NOTE:
+          return state.map(note =>
+            note.id === action.id ? { ...note, ...action.data } : note
+          );
+        default:
+          return state;
+      }
+    };
+
+    const store = createStore(reducer);
+
+    const Note = ({ note }) => {
+      const dispatch = useDispatch();
+      const ref = React.useRef(null);
+      const dragging = React.useRef(false);
+      const offset = React.useRef({ x: 0, y: 0 });
+
+      const handleMouseDown = (e) => {
+        dragging.current = true;
+        const rect = ref.current.getBoundingClientRect();
+        offset.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+      };
+
+      const handleMouseMove = (e) => {
+        if (!dragging.current) return;
+        dispatch(updateNote(note.id, {
+          x: e.clientX - offset.current.x,
+          y: e.clientY - offset.current.y
+        }));
+      };
+
+      const handleMouseUp = () => {
+        dragging.current = false;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      const handleChange = (e) => {
+        dispatch(updateNote(note.id, { text: e.target.value }));
+      };
+
+      const handleOnFocus = (e) => {
+    ref.current.style.zIndex = 2;
+}
+
+const handleOnBlur = (e) => {
+    ref.current.style.zIndex = 1;
+}
+
+
+      return (
+        <div
+          ref={ref}
+          className="note"
+          style={{
+            left: note.x,
+            top: note.y,
+            width: note.width,
+            height: note.height
+          }}
+        >
+          <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur} onMouseDown={handleMouseDown}>
+            Note
+          </div>
+          <textarea onFocus={handleOnFocus} onBlur={handleOnBlur} value={note.text} onChange={handleChange} />
+        </div>
+      );
+    };
+
+    const App = () => {
+      const notes = useSelector(state => state);
+      return (
+        <div>
+          {notes.map(note => (
+            <div key={note.id}>
+              <Note note={note} />
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    ReactDOM.render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+      document.getElementById('root')
+    );
+
+    document.getElementById('createNoteButton').addEventListener('click', () => {
+      const id = Date.now();
+      store.dispatch(addNote({
+        id,
+        text: '',
+        x: Math.random() * (window.innerWidth - 220),
+        y: Math.random() * (window.innerHeight - 200),
+        width: 200,
+        height: 150
+      }));
+    });
+  </script>
+</body>
+</html>
