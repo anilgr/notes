@@ -109,8 +109,8 @@
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         };
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('pointermove', handleMouseMove);
+        document.addEventListener('pointerup', handleMouseUp);
       };
 
       const handleMouseMove = (e) => {
@@ -123,8 +123,8 @@
 
       const handleMouseUp = () => {
         dragging.current = false;
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('pointermove', handleMouseMove);
+        document.removeEventListener('pointerup', handleMouseUp);
       };
 
       const handleChange = (e) => {
