@@ -152,7 +152,7 @@ const handleOnBlur = (e) => {
             height: note.height
           }}
         >
-          <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur} onMouseDown={handleMouseDown}>
+          <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur} onPointerDown={handleMouseDown}>
             Note
           </div>
           <textarea onFocus={handleOnFocus} onBlur={handleOnBlur} value={note.text} onChange={handleChange} />
