@@ -126,7 +126,7 @@
             note.id === action.id ? { ...note, ...action.data } : note
           );
         case DELETE_NOTE:
-          return state.filter((note)=>note.id !== action.id)
+          return state.filter((note) => note.id !== action.id)
         default:
           return state;
       }
@@ -224,7 +224,7 @@
         >
           <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur}>
             <h1>Note</h1>
-            <button onClick={()=>{ dispatch(deleteNote(note.id)) }}>
+            <button onClick={() => { dispatch(deleteNote(note.id)) }}>
               <img src={closeIconURL} />
             </button>
           </div>
@@ -239,9 +239,7 @@
       return (
         <div>
           {notes.map(note => (
-            <div key={note.id}>
-              <Note note={note} />
-            </div>
+            <Note note={note} key={note.id} />
           ))}
         </div>
       );
