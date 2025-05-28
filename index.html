@@ -28,7 +28,6 @@
       position: absolute;
       background: #fff8a6;
       border: 1px solid #ccc;
-      resize: both;
       overflow: auto;
       width: 200px;
       height: 150px;
@@ -61,6 +60,18 @@
       appearance: none;
       outline: none;
       outline-offset: none;
+    }
+
+    .note .resize-handle {
+      display: block;
+      background: repeating-linear-gradient(135deg, white, white 2px, #555 2px, #555 3px);
+      position: absolute;
+      right: 0px;
+      width: 16px;
+      height: 16px;
+      bottom: 0px;
+      clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
+      cursor: se-resize;
     }
   </style>
 </head>
@@ -100,35 +111,65 @@
 
     const store = createStore(reducer);
 
+    const hasClass = (target, className) => target.classList.contains(className);
+
     const Note = ({ note }) => {
       const dispatch = useDispatch();
       const ref = React.useRef(null);
       const dragging = React.useRef(false);
+      const resizing = React.useRef(false);
       const offset = React.useRef({ x: 0, y: 0 });
+      const resizeHandleLastXY = React.useRef(null);
+      const sizeRef = React.useRef({ width: note.width, height: note.height });
+
+      // Keep the sizeRef up-to-date with Redux state
+      React.useEffect(() => {
+        sizeRef.current = { width: note.width, height: note.height };
+      }, [note.width, note.height]);
 
       const handleMouseDown = (e) => {
-        dragging.current = true;
-        const rect = ref.current.getBoundingClientRect();
-        offset.current = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
+        if (hasClass(e.target, "note-header")) {
+          dragging.current = true;
+          const rect = ref.current.getBoundingClientRect();
+          offset.current = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          };
+        } else if (hasClass(e.target, "resize-handle")) {
+          resizing.current = true;
+          resizeHandleLastXY.current = { x: e.clientX, y: e.clientY };
+        }
+
         document.addEventListener('pointermove', handleMouseMove);
         document.addEventListener('pointerup', handleMouseUp);
       };
 
       const handleMouseMove = (e) => {
-        if (!dragging.current) return;
-        const scrollLeft = window.scrollX;
-        const scrollTop = window.scrollY;
-        dispatch(updateNote(note.id, {
-          x: e.clientX + scrollLeft - offset.current.x,
-          y: e.clientY + scrollTop - offset.current.y
-        }));
+        if (dragging.current) {
+          const scrollLeft = window.scrollX;
+          const scrollTop = window.scrollY;
+          dispatch(updateNote(note.id, {
+            x: e.clientX + scrollLeft - offset.current.x,
+            y: e.clientY + scrollTop - offset.current.y
+          }));
+        } else if (resizing.current) {
+          const dx = e.clientX - resizeHandleLastXY.current.x;
+          const dy = e.clientY - resizeHandleLastXY.current.y;
+
+          resizeHandleLastXY.current = { x: e.clientX, y: e.clientY };
+
+          const newWidth = Math.max(100, sizeRef.current.width + dx);
+          const newHeight = Math.max(100, sizeRef.current.height + dy);
+
+          dispatch(updateNote(note.id, { width: newWidth, height: newHeight }));
+          sizeRef.current = { width: newWidth, height: newHeight };
+        }
       };
 
       const handleMouseUp = () => {
         dragging.current = false;
+        resizing.current = false;
+        resizeHandleLastXY.current = null;
         document.removeEventListener('pointermove', handleMouseMove);
         document.removeEventListener('pointerup', handleMouseUp);
       };
@@ -140,15 +181,16 @@
       const handleOnFocus = (e) => {
         ref.current.style.zIndex = 2;
         if (e.target.tagName == "TEXTAREA")
-          ref.current.scrollIntoView({ behaviour: 'smooth' })
+          ref.current.scrollIntoView({ behaviour: 'smooth' });
       }
 
-      const handleOnBlur = (e) => {
+      const handleOnBlur = () => {
         ref.current.style.zIndex = 1;
       }
 
       return (
         <div
+          onPointerDown={handleMouseDown}
           ref={ref}
           className="note"
           style={{
@@ -158,10 +200,11 @@
             height: note.height
           }}
         >
-          <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur} onPointerDown={handleMouseDown}>
+          <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur}>
             Note
           </div>
           <textarea onFocus={handleOnFocus} onBlur={handleOnBlur} value={note.text} onChange={handleChange} />
+          <div className="resize-handle"></div>
         </div>
       );
     };
@@ -199,4 +242,5 @@
     });
   </script>
 </body>
+
 </html>
