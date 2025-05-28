@@ -43,6 +43,8 @@
       font-weight: bold;
       user-select: none;
       touch-action: none;
+      display: flex;
+      justify-content: space-between;
     }
 
     .note textarea {
@@ -62,7 +64,7 @@
       outline-offset: none;
     }
 
-    .note .resize-handle {
+    .note .note-resize {
       display: block;
       background: repeating-linear-gradient(135deg, white, white 2px, #555 2px, #555 3px);
       position: absolute;
@@ -73,6 +75,20 @@
       clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
       cursor: se-resize;
     }
+
+    .note .note-header h1 {
+      margin: auto 8px;
+      font-size: 1rem;
+    }
+
+    .note .note-header button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+    }
   </style>
 </head>
 
@@ -80,21 +96,26 @@
   <button id="createNoteButton">+</button>
   <div id="root"></div>
 
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
   <script src="https://unpkg.com/react-redux@8.1.2/dist/react-redux.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 
   <script type="text/babel">
+
+    const closeIconURL = `data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%20fill='none'%3E%3Cline%20x1='18'%20y1='6'%20x2='6'%20y2='18'/%3E%3Cline%20x1='6'%20y1='6'%20x2='18'%20y2='18'/%3E%3C/svg%3E
+`
     const { createStore } = Redux;
     const { Provider, useDispatch, useSelector } = ReactRedux;
 
     const ADD_NOTE = 'ADD_NOTE';
     const UPDATE_NOTE = 'UPDATE_NOTE';
+    const DELETE_NOTE = "DELETE_NOTE";
 
     const addNote = (note) => ({ type: ADD_NOTE, note });
     const updateNote = (id, data) => ({ type: UPDATE_NOTE, id, data });
+    const deleteNote = (id) => ({ type: DELETE_NOTE, id })
 
     const reducer = (state = [], action) => {
       switch (action.type) {
@@ -104,6 +125,8 @@
           return state.map(note =>
             note.id === action.id ? { ...note, ...action.data } : note
           );
+        case DELETE_NOTE:
+          return state.filter((note)=>note.id !== action.id)
         default:
           return state;
       }
@@ -122,7 +145,6 @@
       const resizeHandleLastXY = React.useRef(null);
       const sizeRef = React.useRef({ width: note.width, height: note.height });
 
-      // Keep the sizeRef up-to-date with Redux state
       React.useEffect(() => {
         sizeRef.current = { width: note.width, height: note.height };
       }, [note.width, note.height]);
@@ -135,7 +157,7 @@
             x: e.clientX - rect.left,
             y: e.clientY - rect.top,
           };
-        } else if (hasClass(e.target, "resize-handle")) {
+        } else if (hasClass(e.target, "note-resize")) {
           resizing.current = true;
           resizeHandleLastXY.current = { x: e.clientX, y: e.clientY };
         }
@@ -201,10 +223,13 @@
           }}
         >
           <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur}>
-            Note
+            <h1>Note</h1>
+            <button onClick={()=>{ dispatch(deleteNote(note.id)) }}>
+              <img src={closeIconURL} />
+            </button>
           </div>
           <textarea onFocus={handleOnFocus} onBlur={handleOnBlur} value={note.text} onChange={handleChange} />
-          <div className="resize-handle"></div>
+          <div className="note-resize"></div>
         </div>
       );
     };
