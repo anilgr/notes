@@ -4,12 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%20fill%3D%22%23fff%22%20width%3D%2224%22%20height%3D%2224%22%3E%3Cpath%20d%3D%22M428%20224H288a48%2048%200%2001-48-48V36a4%204%200%2000-4-4h-92a64%2064%200%2000-64%2064v320a64%2064%200%200064%2064h224a64%2064%200%200064-64V228a4%204%200%2000-4-4z%22%20%2F%3E%3Cpath%20d%3D%22M419.22%20188.59L275.41%2044.78a2%202%200%2000-3.41%201.41V176a16%2016%200%200016%2016h129.81a2%202%200%20001.41-3.41z%22%20%2F%3E%3C%2Fsvg%3E">
   <title>Sticky Notes</title>
   <style>
     body {
       font-family: sans-serif;
       margin: 0;
       background: #f0f0f0;
+      user-select: none;
     }
 
     html,
@@ -237,12 +240,12 @@
           }}
         >
           <div className="note-header" tabIndex={0} onFocus={handleOnFocus} onBlur={handleOnBlur}>
-            <h1>Note</h1>
+            <div><svg xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', padding: '4px' }} viewBox="0 0 512 512" fill="#3333337f" width="16" height="16"><path d="M428 224H288a48 48 0 01-48-48V36a4 4 0 00-4-4h-92a64 64 0 00-64 64v320a64 64 0 0064 64h224a64 64 0 0064-64V228a4 4 0 00-4-4z" /><path d="M419.22 188.59L275.41 44.78a2 2 0 00-3.41 1.41V176a16 16 0 0016 16h129.81a2 2 0 001.41-3.41z" /></svg></div>
             <button onClick={() => { dispatch(deleteNote(note.id)) }}>
               <img src={closeIconURL} />
             </button>
           </div>
-          <textarea onFocus={handleOnFocus} onBlur={handleOnBlur} value={note.text} onChange={handleChange} />
+          <textarea spellcheck="false" onFocus={handleOnFocus} onBlur={handleOnBlur} value={note.text} onChange={handleChange} />
           <div className="note-resize"><div className="note-resize-foreground"></div></div>
         </div>
       );
