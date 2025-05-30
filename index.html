@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Sticky Notes</title>
   <style>
     body {
@@ -12,7 +12,9 @@
       background: #f0f0f0;
     }
 
-    html, body, #root {
+    html,
+    body,
+    #root {
       width: 100%;
       height: 100%;
     }
@@ -212,7 +214,9 @@
       const handleOnFocus = (e) => {
         ref.current.style.zIndex = 1;
         if (e.target.tagName == "TEXTAREA")
-          ref.current.scrollIntoView({ behaviour: 'smooth' });
+          setTimeout(() => {
+            ref.current.scrollIntoView({ behaviour: 'smooth' });
+          }, 300)
       }
 
       const handleOnBlur = () => {
@@ -249,16 +253,16 @@
       const notes = useSelector(state => state);
       const lastPointerDownTime = React.useRef(0);
 
-      React.useEffect(()=>{
+      React.useEffect(() => {
         const pointerdown = (e) => {
           const now = performance.now();
-          const timeDiff = (now - lastPointerDownTime.current)/1000
+          const timeDiff = (now - lastPointerDownTime.current) / 1000
           if (timeDiff < 0.4 && timeDiff > 0) {
             const scrollX = window.scrollX;
             const scrollY = window.scrollY;
             dispatch(addNote({
               id: Date.now(),
-              text: "", 
+              text: "",
               x: e.clientX + scrollX - 100,
               y: e.clientY + scrollY - 16,
               width: 200,
@@ -268,18 +272,18 @@
           lastPointerDownTime.current = now;
         }
         document.body.addEventListener('pointerdown', pointerdown);
-        return () => { 
-          document.body.removeEventListener('pointerdown', pointerdown) 
+        return () => {
+          document.body.removeEventListener('pointerdown', pointerdown)
         }
       }, [dispatch])
 
       return (
         <>
           {
-            notes.length < 1 ? <h4 style={ {margin: "0px", padding: "16px" }}>Double click to add a note.</h4> :
-            notes.map(note => (
-            <Note note={note} key={note.id} />
-          ))}
+            notes.length < 1 ? <h4 style={{ margin: "0px", padding: "16px" }}>Double click to add a note.</h4> :
+              notes.map(note => (
+                <Note note={note} key={note.id} />
+              ))}
         </>
       );
     };
