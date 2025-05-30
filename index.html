@@ -255,28 +255,37 @@
       const dispatch = useDispatch();
       const notes = useSelector(state => state);
       const lastPointerDownTime = React.useRef(0);
+      const lastPointerXY = React.useRef(null);
 
       React.useEffect(() => {
         const pointerdown = (e) => {
           const now = performance.now();
-          const timeDiff = (now - lastPointerDownTime.current) / 1000
-          if (timeDiff < 0.4 && timeDiff > 0) {
-            const scrollX = window.scrollX;
-            const scrollY = window.scrollY;
-            dispatch(addNote({
-              id: Date.now(),
-              text: "",
-              x: e.clientX + scrollX - 100,
-              y: e.clientY + scrollY - 16,
-              width: 200,
-              height: 150
-            }))
-          }
+          if (lastPointerXY.current) {
+            if (Math.hypot(e.clientX - lastPointerXY.current.x, e.clientY - lastPointerXY.current.y) < 100) {
+              const timeDiff = (now - lastPointerDownTime.current) / 1000
+              if (timeDiff < 0.4 && timeDiff > 0) {
+                const scrollX = window.scrollX;
+                const scrollY = window.scrollY;
+                dispatch(addNote({
+                  id: Date.now(),
+                  text: "",
+                  x: e.clientX + scrollX - 100,
+                  y: e.clientY + scrollY - 16,
+                  width: 200,
+                  height: 150
+                }))
+              }
+            }
+            lastPointerXY.current = null;
+          } else {
+            lastPointerXY.current = { x: e.clientX, y: e.clientY }
+          };
           lastPointerDownTime.current = now;
         }
         document.body.addEventListener('pointerdown', pointerdown);
         return () => {
-          document.body.removeEventListener('pointerdown', pointerdown)
+          document.body.removeEventListener('pointerdown', pointerdown);
+          lastPointerXY.current = null;
         }
       }, [dispatch])
 
