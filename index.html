@@ -31,7 +31,6 @@
     .note {
       position: absolute;
       border: 1px solid #ccc;
-      overflow: auto;
       width: 200px;
       height: 150px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -72,10 +71,10 @@
     .note .note-resize {
       display: block;
       position: absolute;
-      right: 0px;
-      width: 16px;
-      height: 16px;
-      bottom: 0px;
+      right: -24px;
+      width: 48px;
+      height: 48px;
+      bottom: -24px;
       cursor: se-resize;
       touch-action: none;
       user-select: none;
@@ -83,7 +82,7 @@
 
     .note .note-resize-foreground {
       background: repeating-linear-gradient(135deg, white, white 2px, #555 2px, #555 3px);
-      clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
+      clip-path: polygon(50% 0%, 0% 50%, 50% 50%);
       width: 100%;
       height: 100%;
       pointer-events: none;
