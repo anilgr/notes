@@ -215,7 +215,7 @@
         ref.current.style.zIndex = 1;
         if (e.target.tagName == "TEXTAREA")
           setTimeout(() => {
-            ref.current.scrollIntoView({ behaviour: 'smooth' });
+            ref.current.scrollIntoView({ behaviour: 'smooth', block: 'center' });
           }, 300)
       }
 
