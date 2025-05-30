@@ -276,10 +276,8 @@
                 }))
               }
             }
-            lastPointerXY.current = null;
-          } else {
-            lastPointerXY.current = { x: e.clientX, y: e.clientY }
-          };
+          }
+          lastPointerXY.current = { x: e.clientX, y: e.clientY }
           lastPointerDownTime.current = now;
         }
         document.body.addEventListener('pointerdown', pointerdown);
@@ -295,7 +293,8 @@
             notes.length < 1 ? <h4 style={{ margin: "0px", padding: "16px" }}>Double click to add a note.</h4> :
               notes.map(note => (
                 <Note note={note} key={note.id} />
-              ))}
+              ))
+          }
         </>
       );
     };
